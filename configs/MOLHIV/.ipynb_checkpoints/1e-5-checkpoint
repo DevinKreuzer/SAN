@@ -1,0 +1,47 @@
+{
+    "gpu": {
+        "use": true,
+        "id": 0
+    },
+    
+    "model": "GraphTransformer",
+    "dataset": "MOL-HIV",
+    
+    "out_dir": "out/MOLHIV/full/node",
+    
+    "params": {
+        "seed": 41,
+        "epochs": 1000,
+        "batch_size": 64,
+        "init_lr": 0.0007,
+        "lr_reduce_factor": 0.5,
+        "lr_schedule_patience": 15,
+        "min_lr": 1e-6,
+        "weight_decay": 0.0,
+        "print_epoch_interval": 5,
+        "max_time": 24
+    },
+    
+    "net_params": {
+        "full_graph": true,
+        "Lambda": 1e-5,
+        "max_freqs": 10,
+        
+        "Laplace_PE": "node",
+        "PE_layers": 3,
+        "PE_dim": 16,
+        "PE_n_heads": 4,
+        
+        "GNN_layers": 8,
+        "GNN_hidden_dim": 100,
+        "GNN_out_dim": 100,
+        "GNN_n_heads": 10,
+
+        "residual": true,
+        "readout": "mean",
+        "in_feat_dropout": 0.0,
+        "dropout": 0.0,
+        "layer_norm": false,
+        "batch_norm": true
+    }
+}

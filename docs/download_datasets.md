@@ -31,7 +31,7 @@ Script [script_download_SBMs.sh](../data/script_download_SBMs.sh) is located her
 
 <br>
 
-## 3. All datasets
+## 3. All BGNN datasets
 
 ```
 # At the root of the project
@@ -41,5 +41,12 @@ bash script_download_all_datasets.sh
 
 Script [script_download_all_datasets.sh](../data/script_download_all_datasets.sh) is located here. 
 
+## 4. MolHIV OGB dataset
+
+```
+# Ensure OGB is installed: 
+pip install ogb
+```
+If properly installed, the dataset will be saved to the ```dataset/``` folder after running the MolHIV experiment.
 
 <br><br><br>

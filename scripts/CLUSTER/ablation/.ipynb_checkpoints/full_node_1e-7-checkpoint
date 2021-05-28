@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=pattern_full_node
+#SBATCH --output=%x-%j.output.txt
+#SBATCH --error=%x-%j.error.txt
+#SBATCH --cpus-per-task=4
+#SBATCH --ntasks=1
+#SBATCH --gres=gpu:1
+#SBATCH --time=48:00:00
+#SBATCH --mem=24Gb
+
+source ~/venv/bin/activate
+module load cuda/10.2
+
+cd ~/SAN/
+
+python  main_SBMs_node_classification.py --dataset SBM_CLUSTER --seed 41 --config 'configs/CLUSTER/ablation/full/1e-7/node'
+python  main_SBMs_node_classification.py --dataset SBM_CLUSTER --seed 55 --config 'configs/CLUSTER/ablation/full/1e-7/node'
+python  main_SBMs_node_classification.py --dataset SBM_CLUSTER --seed 13 --config 'configs/CLUSTER/ablation/full/1e-7/node'
+python  main_SBMs_node_classification.py --dataset SBM_CLUSTER --seed 88 --config 'configs/CLUSTER/ablation/full/1e-7/node'
+
+
+

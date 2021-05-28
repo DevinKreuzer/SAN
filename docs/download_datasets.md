@@ -47,6 +47,6 @@ Script [script_download_all_datasets.sh](../data/script_download_all_datasets.sh
 # Ensure OGB is installed: 
 pip install ogb
 ```
-If properly installed, the dataset will be saved to the ```dataset/``` folder after running the MolHIV experiment.
+If properly installed, the dataset will be saved to the ```dataset/``` folder after running a MolHIV experiment.
 
 <br><br><br>

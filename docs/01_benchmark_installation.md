@@ -30,14 +30,15 @@ source ~/.bash_profile    # For OSX
 ```
 # Clone GitHub repo
 conda install git
-git clone https://github.com/graphdeeplearning/graphtransformer.git
-cd graphtransformer
+git clone https://github.com/DevinKreuzer/SAN.git
+cd SAN
 
 # Install python environment
-conda env create -f environment_cpu.yml   
+# using pip
+pip install -r requirements.txt
 
-# Activate environment
-conda activate graph_transformer
+# using Conda
+conda create --name <env_name> --file requirements.txt
 ```
 
 
@@ -65,14 +66,15 @@ cat /usr/local/cuda/version.txt # Check CUDA version is 10.2
 
 # Clone GitHub repo
 conda install git
-git clone https://github.com/graphdeeplearning/graphtransformer.git
-cd graphtransformer
+git clone https://github.com/DevinKreuzer/SAN.git
+cd SAN
 
 # Install python environment
-conda env create -f environment_gpu.yml 
+# using pip
+pip install -r requirements.txt
 
-# Activate environment
-conda activate graph_transformer
+# using Conda
+conda create --name <env_name> --file requirements.txt
 ```
 
 

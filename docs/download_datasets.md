@@ -41,9 +41,9 @@ bash script_download_all_datasets.sh
 
 Script [script_download_all_datasets.sh](../data/script_download_all_datasets.sh) is located here. 
 
-## 4. MolHIV OGB dataset
-
 <br>
+
+## 4. MolHIV OGB dataset
 
 ```
 # Ensure OGB is installed: 

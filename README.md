@@ -10,7 +10,7 @@ We present Spectral Attention Networks, a power GNN that leverages key principle
 * ```layers``` contains the multi-headed attention employed by the Main Graph Transformer implemented in DGL.
 * ```configs``` contains the various parameters used in the ablation and SOTA comparison studies
 * ```train``` contains methods to train the models
-* ```docs``` contains scripts from https://github.com/graphdeeplearning/graphtransformer to download datasets and setup environments.
+* ```misc``` contains scripts from https://github.com/graphdeeplearning/graphtransformer to download datasets and setup environments.
 * ```scripts``` contains scripts to reproduce ablation and SOTA comparison results. See ```scripts/reproduce.md``` for details.
 
 

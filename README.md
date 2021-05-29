@@ -8,8 +8,9 @@ We present Spectral Attention Networks, a powerful GNN that leverages key princi
 
 * ```nets``` contains the Node, Edge and no LPE architectures implemented with PyTorch.
 * ```layers``` contains the multi-headed attention employed by the Main Graph Transformer implemented in DGL.
-* ```configs``` contains the various parameters used in the ablation and SOTA comparison studies
 * ```train``` contains methods to train the models
+* ```data``` contains dataset classes and various methods used in precomputation
+* ```configs``` contains the various parameters used in the ablation and SOTA comparison studies
 * ```misc``` contains scripts from https://github.com/graphdeeplearning/graphtransformer to download datasets and setup environments.
 * ```scripts``` contains scripts to reproduce ablation and SOTA comparison results. See ```scripts/reproduce.md``` for details.
 

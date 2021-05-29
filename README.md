@@ -11,6 +11,6 @@ We present Spectral Attention Networks, a power GNN that leverages key principle
 * ```configs``` contains the various parameters used in the ablation and SOTA comparison studies
 * ```train``` contains methods to train the models
 * ```docs``` contains scripts from https://github.com/graphdeeplearning/graphtransformer to download datasets and setup environments.
-* ```scripts``` contains scripts to reproduce ablation and SOTA comparison results.
+* ```scripts``` contains scripts to reproduce ablation and SOTA comparison results. See ```scripts/reproduce.md``` for details.
 
 

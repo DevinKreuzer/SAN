@@ -4,8 +4,8 @@
 #   bash script_download_SBMs.sh
 
 
-DIR=SBMs/
-cd $DIR
+mkdir SBMs
+cd SBMs
 
 
 FILE=SBM_CLUSTER.pkl

@@ -76,7 +76,7 @@ def make_full_graph(graph):
         pass
 
     #Initalize fake edge features w/ 0s
-    full_g.edata['feat']=torch.zeros(full_g.number_of_edges(), dtype=torch.long)
+    full_g.edata['feat']=torch.zeros(full_g.number_of_edges(), 3, dtype=torch.long)
     full_g.edata['real']=torch.zeros(full_g.number_of_edges(), dtype=torch.long)
     
     #Copy real edge data over, and identify real edges!

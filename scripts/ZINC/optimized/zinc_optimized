@@ -1,3 +1,4 @@
+#!/bin/bash
 cd ~/SAN/
 
 python  main_ZINC_graph_regression.py --seed 41 --config 'configs/ZINC/optimized'

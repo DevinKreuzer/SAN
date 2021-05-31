@@ -14,7 +14,7 @@ from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 from layers.graph_transformer_layer import GraphTransformerLayer
 from layers.mlp_readout_layer import MLPReadout
 
-class GraphTransformerNetEdgePE(nn.Module):
+class SAN_NodeLPE(nn.Module):
     def __init__(self, net_params):
         super().__init__()
         
@@ -42,51 +42,53 @@ class GraphTransformerNetEdgePE(nn.Module):
         self.device = net_params['device']
         self.in_feat_dropout = nn.Dropout(in_feat_dropout)
         
-        self.embedding_h = AtomEncoder(emb_dim = GT_hidden_dim)
-        self.embedding_e = BondEncoder(emb_dim = GT_hidden_dim-LPE_dim)#Remove some embedding dimensions to make room for concatenating laplace encoding
-        self.linear_A = nn.Linear(3, LPE_dim)
+        self.embedding_h = AtomEncoder(emb_dim = GT_hidden_dim-LPE_dim) #Remove some embedding dimensions to make room for concatenating LPE
+        self.embedding_e_real = BondEncoder(emb_dim = GT_hidden_dim)
+        self.embedding_e_fake = nn.Embedding(1, GT_hidden_dim)
+        self.linear_A = nn.Linear(2, LPE_dim)
         
         encoder_layer = nn.TransformerEncoderLayer(d_model=LPE_dim, nhead=LPE_n_heads)
         self.PE_Transformer = nn.TransformerEncoder(encoder_layer, num_layers=LPE_layers)
         
         self.layers = nn.ModuleList([ GraphTransformerLayer(gamma, GT_hidden_dim, GT_hidden_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual) for _ in range(GT_layers-1) ])
-        self.layers.append(GraphTransformerLayer(gamma, GT_hidden_dim, GT_out_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual))   
-        self.MLP_layer = MLPReadout(GT_out_dim, 1)   #  out dim for probability     
         
+        self.layers.append(GraphTransformerLayer(gamma, GT_hidden_dim, GT_out_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual))
+        self.MLP_layer = MLPReadout(GT_out_dim, 1)   # 1 out dim for probability      
         
 
-    def forward(self, g, h, e, diff, product, EigVals):
+    def forward(self, g, h, e, EigVecs, EigVals):
         
+
         # input embedding
         h = self.embedding_h(h)
-        h = self.in_feat_dropout(h)
-        e = self.embedding_e(e)        
-          
-        PosEnc = torch.cat((diff, product, EigVals), 2) # (Num edges) x (Num Eigenvectors) x 3
-        empty_mask = torch.isnan(PosEnc) # (Num edges) x (Num Eigenvectors) x 3
-        PosEnc[empty_mask] = 0 # (Num edges) x (Num Eigenvectors) x 3
-
-        PosEnc = torch.transpose(PosEnc, 0 ,1).float() # (Num Eigenvectors) x (Num edges) x 3
-        PosEnc = self.linear_A(PosEnc) # (Num Eigenvectors) x (Num edges) x PE_dim
-            
+        e = self.embedding_e_real(e)
+        
+        PosEnc = torch.cat((EigVecs.unsqueeze(2), EigVals), dim=2).float() # (Num nodes) x (Num Eigenvectors) x 2
+        empty_mask = torch.isnan(PosEnc) # (Num nodes) x (Num Eigenvectors) x 2
+        
+        PosEnc[empty_mask] = 0 # (Num nodes) x (Num Eigenvectors) x 2
+        PosEnc = torch.transpose(PosEnc, 0 ,1).float() # (Num Eigenvectors) x (Num nodes) x 2
+        PosEnc = self.linear_A(PosEnc) # (Num Eigenvectors) x (Num nodes) x PE_dim
+        
+        
         #1st Transformer: Learned PE
         PosEnc = self.PE_Transformer(src=PosEnc, src_key_padding_mask=empty_mask[:,:,0]) 
         
         #remove masked sequences
         PosEnc[torch.transpose(empty_mask, 0 ,1)[:,:,0]] = float('nan') 
-
+        
         #Sum pooling
-        PosEnc = torch.nansum(PosEnc, 0, keepdim=False) # (Num edge) x PE_dim
-
+        PosEnc = torch.nansum(PosEnc, 0, keepdim=False)
+        
         #Concatenate learned PE to input embedding
-        e = torch.cat((e, PosEnc), 1)
-        
-        
-        # GNN
+        h = torch.cat((h, PosEnc), 1)
+
+        h = self.in_feat_dropout(h)
+          
+        # Second Transformer
         for conv in self.layers:
             h, e = conv(g, h, e)
         g.ndata['h'] = h
-        
         
         if self.readout == "sum":
             hg = dgl.sum_nodes(g, 'h')
@@ -106,6 +108,5 @@ class GraphTransformerNetEdgePE(nn.Module):
         loss = nn.BCELoss()
         
         l = loss(scores.float(), targets.float())
-        
         
         return l

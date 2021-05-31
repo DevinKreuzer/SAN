@@ -1,6 +1,6 @@
 # SAN
 
-We present Spectral Attention Networks, a powerful GNN that leverages key principles from spectral graph theory to enable full graph attention.
+Implementation of Spectral Attention Networks, a powerful GNN that leverages key principles from spectral graph theory to enable full graph attention.
 
 ![full_method](https://user-images.githubusercontent.com/47570400/119883871-046aa280-befe-11eb-9063-108f4fe1a123.png)
 

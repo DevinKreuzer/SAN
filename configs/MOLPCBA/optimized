@@ -33,8 +33,8 @@
         "LPE_n_heads": 4,
 
         "GT_layers": 10,
-        "GT_hidden_dim": 64,
-        "GT_out_dim": 64,
+        "GT_hidden_dim": 256,
+        "GT_out_dim": 256,
         "GT_n_heads": 4,
 
         "residual": true,

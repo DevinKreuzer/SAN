@@ -1,22 +1,24 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 
 import dgl
-
-from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
+import numpy as np
 
 """
-    Graph Transformer with edge features
+    Graph Transformer
     
 """
 from layers.graph_transformer_layer import GraphTransformerLayer
 from layers.mlp_readout_layer import MLPReadout
 
-class GraphTransformerNetEdgePE(nn.Module):
+class SAN_EdgeLPE(nn.Module):
+
     def __init__(self, net_params):
         super().__init__()
+
+        in_dim_node = net_params['in_dim'] # node_dim (feat is an integer)
+        self.n_classes = net_params['n_classes']
         
         full_graph = net_params['full_graph']
         gamma = net_params['gamma']
@@ -42,18 +44,18 @@ class GraphTransformerNetEdgePE(nn.Module):
         self.device = net_params['device']
         self.in_feat_dropout = nn.Dropout(in_feat_dropout)
         
-        self.embedding_h = AtomEncoder(emb_dim = GT_hidden_dim)
-        self.embedding_e = BondEncoder(emb_dim = GT_hidden_dim-LPE_dim)#Remove some embedding dimensions to make room for concatenating laplace encoding
+        self.embedding_h = nn.Embedding(in_dim_node, GT_hidden_dim)
+        self.embedding_e = nn.Embedding(2, GT_hidden_dim-LPE_dim)#Remove some embedding dimensions to make room for concatenating laplace encoding
         self.linear_A = nn.Linear(3, LPE_dim)
         
         encoder_layer = nn.TransformerEncoderLayer(d_model=LPE_dim, nhead=LPE_n_heads)
         self.PE_Transformer = nn.TransformerEncoder(encoder_layer, num_layers=LPE_layers)
         
         self.layers = nn.ModuleList([ GraphTransformerLayer(gamma, GT_hidden_dim, GT_hidden_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual) for _ in range(GT_layers-1) ])
-        self.layers.append(GraphTransformerLayer(gamma, GT_hidden_dim, GT_out_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual))   
-        self.MLP_layer = MLPReadout(GT_out_dim, 1)   #  out dim for probability     
         
-        
+        self.layers.append(GraphTransformerLayer(gamma, GT_hidden_dim, GT_out_dim, GT_n_heads, full_graph, dropout, self.layer_norm, self.batch_norm, self.residual))
+        self.MLP_layer = MLPReadout(GT_out_dim, self.n_classes)
+
 
     def forward(self, g, h, e, diff, product, EigVals):
         
@@ -82,30 +84,33 @@ class GraphTransformerNetEdgePE(nn.Module):
         e = torch.cat((e, PosEnc), 1)
         
         
-        # GNN
+        # GraphTransformer Layers
         for conv in self.layers:
             h, e = conv(g, h, e)
-        g.ndata['h'] = h
-        
-        
-        if self.readout == "sum":
-            hg = dgl.sum_nodes(g, 'h')
-        elif self.readout == "max":
-            hg = dgl.max_nodes(g, 'h')
-        elif self.readout == "mean":
-            hg = dgl.mean_nodes(g, 'h')
-        else:
-            hg = dgl.mean_nodes(g, 'h')  # default readout is mean nodes
             
-        sig = nn.Sigmoid()
+        # output
+        h_out = self.MLP_layer(h)
+
+        return h_out
     
-        return sig(self.MLP_layer(hg))
+    
+    def loss(self, pred, label):
+
+        # calculating label weights for weighted loss computation
+        V = label.size(0)
+        label_count = torch.bincount(label)
+        label_count = label_count[label_count.nonzero()].squeeze()
+        cluster_sizes = torch.zeros(self.n_classes).long().to(self.device)
+        cluster_sizes[torch.unique(label)] = label_count
+        weight = (V - cluster_sizes).float() / V
+        weight *= (cluster_sizes>0).float()
         
-    def loss(self, scores, targets):
+        # weighted cross-entropy for unbalanced classes
+        criterion = nn.CrossEntropyLoss(weight=weight)
+        loss = criterion(pred, label)
+
+        return loss
+
+
+
         
-        loss = nn.BCELoss()
-        
-        l = loss(scores.float(), targets.float())
-        
-        
-        return l

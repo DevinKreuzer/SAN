@@ -4,8 +4,8 @@
 #   bash script_download_molecules.sh
 
 
-DIR=molecules/
-cd $DIR
+mkdir molecules/
+cd molecules
 
 
 FILE=ZINC.pkl

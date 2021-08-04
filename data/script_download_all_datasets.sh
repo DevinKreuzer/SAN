@@ -9,8 +9,8 @@
 # ZINC
 ############
 
-DIR=molecules/
-cd $DIR
+mkdir molecules
+cd molecules
 
 FILE=ZINC.pkl
 if test -f "$FILE"; then
@@ -27,8 +27,8 @@ cd ..
 # PATTERN and CLUSTER 
 ############
 
-DIR=SBMs/
-cd $DIR
+mkdir SBMs
+cd SBMs
 
 FILE=SBM_CLUSTER.pkl
 if test -f "$FILE"; then

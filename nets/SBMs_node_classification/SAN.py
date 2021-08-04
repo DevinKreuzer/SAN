@@ -12,7 +12,7 @@ import numpy as np
 from layers.graph_transformer_layer import GraphTransformerLayer
 from layers.mlp_readout_layer import MLPReadout
 
-class GraphTransformerNet(nn.Module):
+class SAN(nn.Module):
 
     def __init__(self, net_params):
         super().__init__()

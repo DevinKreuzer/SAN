@@ -98,8 +98,8 @@ class MultiHeadAttentionLayer(nn.Module):
 
         
         if self.full_graph:
-            real_ids = torch.nonzero(g.edata['real']).view(-1)
-            fake_ids = torch.nonzero(g.edata['real']==0).view(-1)
+            real_ids = torch.nonzero(g.edata['real']).squeeze()
+            fake_ids = torch.nonzero(g.edata['real']==0).squeeze()
 
         else:
             real_ids = g.edges(form='eid')

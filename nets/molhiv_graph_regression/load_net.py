@@ -1,22 +1,22 @@
 
-from nets.molhiv_graph_regression.graph_transformer_net_node_PE import GraphTransformerNetNodePE
-from nets.molhiv_graph_regression.graph_transformer_net_edge_PE import GraphTransformerNetEdgePE
-from nets.molhiv_graph_regression.graph_transformer_net import GraphTransformerNet
+from nets.molhiv_graph_regression.SAN_NodeLPE import SAN_NodeLPE
+from nets.molhiv_graph_regression.SAN_EdgeLPE import SAN_EdgeLPE
+from nets.molhiv_graph_regression.SAN import SAN
 
-def GraphTransformerNodePE(net_params):
-    return GraphTransformerNetNodePE(net_params)
+def NodeLPE(net_params):
+    return SAN_NodeLPE(net_params)
 
-def GraphTransformerEdgePE(net_params):
-    return GraphTransformerNetEdgePE(net_params)
+def EdgeLPE(net_params):
+    return SAN_EdgeLPE(net_params)
 
-def GraphTransformer(net_params):
-    return GraphTransformerNet(net_params)
+def NoLPE(net_params):
+    return SAN(net_params)
 
 def gnn_model(LPE, net_params):
     model = {
-        'edge': GraphTransformerEdgePE,
-        'node': GraphTransformerNodePE,
-        'none': GraphTransformer
+        'edge': EdgeLPE,
+        'node': NodeLPE,
+        'none': NoLPE
     }
         
     return model[LPE](net_params)

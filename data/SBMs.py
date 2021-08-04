@@ -105,14 +105,12 @@ def laplace_decomp(g, max_freqs):
     L = sp.eye(g.number_of_nodes()) - N * A * N
 
     # Eigenvectors with numpy
-    EigVals, EigVecs = np.linalg.eig(L.toarray())
-    idx = EigVals.argsort()[0 : max_freqs] # Keep up to the maximum desired number of frequencies
-    EigVals, EigVecs = EigVals[idx], np.real(EigVecs[:,idx])
-    
-    #Sort, normalize and pad EigenVectors
-    EigVecs = EigVecs[:, EigVals.argsort()]# increasing order
+    EigVals, EigVecs = np.linalg.eigh(L.toarray())
+    EigVals, EigVecs = EigVals[: max_freqs], EigVecs[:, :max_freqs]  # Keep up to the maximum desired number of frequencies
+
+    # Normalize and pad EigenVectors
     EigVecs = torch.from_numpy(EigVecs).float()
-    EigVecs= F.normalize(EigVecs, p=2, dim=1, eps=1e-12, out=None)
+    EigVecs = F.normalize(EigVecs, p=2, dim=1, eps=1e-12, out=None)
     
     if n<max_freqs:
         g.ndata['EigVecs'] = F.pad(EigVecs, (0, max_freqs-n), value=float('nan'))

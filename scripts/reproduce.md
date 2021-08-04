@@ -12,7 +12,7 @@ All outputs will be sent to the ```/out``` directory from the root of the projec
 
 ```
 # SOTA comparison results
-bash ZINC/optimized
+bash ZINC/optimized/zinc_optimized
 
 # Ablation results
 bash ZINC/ablation/sparse_none
@@ -33,7 +33,7 @@ bash ZINC/ablation/full_node_1e-8
 
 ```
 # SOTA comparison results
-bash PATTERN/optimized
+bash PATTERN/optimized/pattern_optimized
 
 # Ablation results
 bash PATTERN/ablation/sparse_none
@@ -55,7 +55,7 @@ bash PATTERN/ablation/full_node_1e-8
 
 ```
 # SOTA comparison results
-bash CLUSTER/optimized
+bash CLUSTER/optimized/cluster_optimized
 
 # Ablation results
 bash CLUSTER/ablation/sparse_none
@@ -77,7 +77,7 @@ bash CLUSTER/ablation/full_node_1e-8
 
 ```
 # SOTA comparison results
-bash MOLHIV/optimized
+bash MOLHIV/optimized/molhiv_optimized
 
 # Ablation results
 bash MOLHIV/ablation/sparse_none

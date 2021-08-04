@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd ~/SAN/
+
+python  main_molhiv.py --config 'configs/MOLHIV/ablation/full/1e-7/node'
+python  main_molhiv.py --config 'configs/MOLHIV/ablation/full/1e-7/node'
+python  main_molhiv.py --config 'configs/MOLHIV/ablation/full/1e-7/node'
+python  main_molhiv.py --config 'configs/MOLHIV/ablation/full/1e-7/node'
+
+
+

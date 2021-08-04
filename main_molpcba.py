@@ -26,7 +26,7 @@ from tqdm import tqdm
 """
     IMPORTING CUSTOM MODULES/METHODS
 """
-from nets.molhiv_graph_regression.load_net import gnn_model 
+from nets.molpcba.load_net import gnn_model 
 from data.data import LoadData 
 
 
@@ -132,10 +132,10 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
                                                      verbose=True)
     
     epoch_train_losses, epoch_val_losses = [], []
-    epoch_train_AUCs, epoch_val_AUCs, epoch_test_AUCs = [], [], []
+    epoch_train_APs, epoch_val_APs, epoch_test_APs = [], [], []
         
 
-    from train.train_molhiv import train_epoch, evaluate_network
+    from train.train_molpcba import train_epoch, evaluate_network
 
     
     train_loader = DataLoader(trainset, batch_size=params['batch_size'], shuffle=True, collate_fn=dataset.collate)
@@ -151,30 +151,30 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
 
                 start = time.time()
 
-                epoch_train_loss, epoch_train_auc, optimizer = train_epoch(model, optimizer, device, train_loader, epoch, net_params['LPE'])
+                epoch_train_loss, epoch_train_ap, optimizer = train_epoch(model, optimizer, device, train_loader, epoch, net_params['LPE'])
                     
-                epoch_val_loss, epoch_val_auc = evaluate_network(model, device, val_loader, epoch, net_params['LPE'])
-                _, epoch_test_auc = evaluate_network(model, device, test_loader, epoch, net_params['LPE'])
+                epoch_val_loss, epoch_val_ap = evaluate_network(model, device, val_loader, epoch, net_params['LPE'])
+                _, epoch_test_ap = evaluate_network(model, device, test_loader, epoch, net_params['LPE'])
                 
                 epoch_train_losses.append(epoch_train_loss)
                 epoch_val_losses.append(epoch_val_loss)
-                epoch_train_AUCs.append(epoch_train_auc)
-                epoch_val_AUCs.append(epoch_val_auc)
+                epoch_train_APs.append(epoch_train_ap)
+                epoch_val_APs.append(epoch_val_ap)
                 
-                epoch_test_AUCs.append(epoch_test_auc)
+                epoch_test_APs.append(epoch_test_ap)
 
                 writer.add_scalar('train/_loss', epoch_train_loss, epoch)
                 writer.add_scalar('val/_loss', epoch_val_loss, epoch)
-                writer.add_scalar('train/_auc', epoch_train_auc, epoch)
-                writer.add_scalar('val/_auc', epoch_val_auc, epoch)
-                writer.add_scalar('test/_auc', epoch_test_auc, epoch)
+                writer.add_scalar('train/_AP', epoch_train_auc, epoch)
+                writer.add_scalar('val/_AP', epoch_val_auc, epoch)
+                writer.add_scalar('test/_AP', epoch_test_auc, epoch)
                 writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], epoch)
 
                         
                 t.set_postfix(time=time.time()-start, lr=optimizer.param_groups[0]['lr'],
                               train_loss=epoch_train_loss, val_loss=epoch_val_loss,
-                              train_AUC=epoch_train_auc, val_AUC=epoch_val_auc,
-                              test_AUC=epoch_test_auc)
+                              train_AUC=epoch_train_ap, val_AUC=epoch_val_ap,
+                              test_AUC=epoch_test_ap)
 
 
                 per_epoch_time.append(time.time()-start)
@@ -209,13 +209,13 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
         print('Exiting from training early because of KeyboardInterrupt')
     
     #Return test and train metrics at best val metric
-    index = epoch_val_AUCs.index(max(epoch_val_AUCs))
+    index = epoch_val_APs.index(max(epoch_val_APs))
     
-    test_auc = epoch_test_AUCs[index]
-    train_auc = epoch_train_AUCs[index]
+    test_ap = epoch_test_APs[index]
+    train_ap = epoch_train_APs[index]
     
-    print("Test AUC: {:.4f}".format(test_auc))
-    print("Train AUC: {:.4f}".format(train_auc))
+    print("Test AP: {:.4f}".format(test_ap))
+    print("Train AP: {:.4f}".format(train_ap))
     print("Convergence Time (Epochs): {:.4f}".format(epoch))
     print("TOTAL TIME TAKEN: {:.4f}s".format(time.time()-t0))
     print("AVG TIME PER EPOCH: {:.4f}s".format(np.mean(per_epoch_time)))
@@ -227,10 +227,10 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     """
     with open(write_file_name + '.txt', 'w') as f:
         f.write("""Dataset: {},\nModel: {}\n\nparams={}\n\nnet_params={}\n\n{}\n\nTotal Parameters: {}\n\n
-    FINAL RESULTS\nTEST AUC: {:.4f}\nTRAIN AUC: {:.4f}\n\n
+    FINAL RESULTS\nTEST AP: {:.4f}\nTRAIN AP: {:.4f}\n\n
     Convergence Time (Epochs): {:.4f}\nTotal Time Taken: {:.4f} hrs\nAverage Time Per Epoch: {:.4f} s\n\n\n"""\
           .format(DATASET_NAME, MODEL_NAME, params, net_params, model, net_params['total_param'],
-                  test_auc, train_auc, epoch, (time.time()-t0)/3600, np.mean(per_epoch_time)))
+                  test_ap, train_ap, epoch, (time.time()-t0)/3600, np.mean(per_epoch_time)))
         
 
 
@@ -398,28 +398,5 @@ def main():
         os.makedirs(out_dir + 'configs')
 
     train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs)
-
     
-    
-    
-    
-    
-    
-    
-main()    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+main()

@@ -173,8 +173,8 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
                         
                 t.set_postfix(time=time.time()-start, lr=optimizer.param_groups[0]['lr'],
                               train_loss=epoch_train_loss, val_loss=epoch_val_loss,
-                              train_AUC=epoch_train_ap, val_AUC=epoch_val_ap,
-                              test_AUC=epoch_test_ap)
+                              train_AP=epoch_train_ap, val_AP=epoch_val_ap,
+                              test_AP=epoch_test_ap)
 
 
                 per_epoch_time.append(time.time()-start)

@@ -4,6 +4,7 @@
 from data.molecules import MoleculeDataset
 from data.SBMs import SBMsDataset
 from data.molhiv import MolHIVDataset
+from data.molpcba import MolPCBADataset
 
 def LoadData(DATASET_NAME):
     """
@@ -23,4 +24,7 @@ def LoadData(DATASET_NAME):
     
     if DATASET_NAME == 'MOL-HIV':
         return MolHIVDataset(DATASET_NAME)
+    
+    if DATASET_NAME == 'MOL-PCBA':
+        return MolPCBADataset(DATASET_NAME)
     

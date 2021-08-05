@@ -3,6 +3,7 @@
     and evaluating one epoch
 """
 import torch
+from torch._C import dtype
 import torch.nn as nn
 import math
 
@@ -22,10 +23,10 @@ def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
     wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
 
     for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
-
-        batch_graphs = batch_graphs.to(device)
-        batch_x = batch_graphs.ndata['feat'].to(device)  # num x feat
-        batch_e = batch_graphs.edata['feat'].to(device)
+        print(iter, torch.cuda.memory_allocated(0))
+        batch_graphs = batch_graphs.to(device=device)
+        batch_x = batch_graphs.ndata['feat']
+        batch_e = batch_graphs.edata['feat']
 
         batch_targets = batch_targets.to(device)
         optimizer.zero_grad()
@@ -87,20 +88,20 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
 
     with torch.no_grad():
         for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
-            batch_graphs = batch_graphs.to(device)
-            batch_x = batch_graphs.ndata['feat'].to(device)  # num x feat
-            batch_e = batch_graphs.edata['feat'].to(device)
-            batch_targets = batch_targets.to(device)
+            batch_graphs = batch_graphs.to(device=device)
+            batch_x = batch_graphs.ndata['feat']
+            batch_e = batch_graphs.edata['feat']
+            batch_targets = batch_targets.to(device=device)
 
             if LPE == 'node':
-                batch_EigVecs = batch_graphs.ndata['EigVecs'].to(device)
-                batch_EigVals = batch_graphs.ndata['EigVals'].to(device)
+                batch_EigVecs = batch_graphs.ndata['EigVecs']
+                batch_EigVals = batch_graphs.ndata['EigVals']
                 batch_scores = model.forward(batch_graphs, batch_x, batch_e, batch_EigVecs, batch_EigVals)
 
             elif LPE == 'edge':
-                batch_diff = batch_graphs.edata['diff'].to(device)
-                batch_prod = batch_graphs.edata['product'].to(device)
-                batch_EigVals = batch_graphs.edata['EigVals'].to(device)
+                batch_diff = batch_graphs.edata['diff']
+                batch_prod = batch_graphs.edata['product']
+                batch_EigVals = batch_graphs.edata['EigVals']
                 batch_scores = model.forward(batch_graphs, batch_x, batch_e, batch_diff, batch_prod, batch_EigVals)
 
             else:

@@ -15,6 +15,8 @@ import numpy as np
 import networkx as nx
 import hashlib
 
+from tqdm.std import tqdm
+
 
 def laplace_decomp(graph, max_freqs):
     g, label = graph
@@ -66,7 +68,7 @@ def make_full_graph(graph):
         full_g.ndata['EigVals'] = g.ndata['EigVals']
     except:
         pass
-    
+
     # Initalize fake edge features w/ 0s
     full_g.edata['feat'] = torch.zeros(full_g.number_of_edges(), 3, dtype=torch.long)
     full_g.edata['real'] = torch.zeros(full_g.number_of_edges(), dtype=torch.long)
@@ -134,16 +136,16 @@ class MolPCBADataset(torch.utils.data.Dataset):
         return batched_graph, labels
 
     def _laplace_decomp(self, max_freqs):
-        self.train = [laplace_decomp(graph, max_freqs) for graph in self.train]
-        self.val = [laplace_decomp(graph, max_freqs) for graph in self.val]
-        self.test = [laplace_decomp(graph, max_freqs) for graph in self.test]
+        self.train = [laplace_decomp(graph, max_freqs) for graph in tqdm(self.train)]
+        self.val = [laplace_decomp(graph, max_freqs) for graph in tqdm(self.val)]
+        self.test = [laplace_decomp(graph, max_freqs) for graph in tqdm(self.test)]
 
     def _make_full_graph(self):
-        self.train = [make_full_graph(graph) for graph in self.train]
-        self.val = [make_full_graph(graph) for graph in self.val]
-        self.test = [make_full_graph(graph) for graph in self.test]
+        self.train = [make_full_graph(graph) for graph in tqdm(self.train)]
+        self.val = [make_full_graph(graph) for graph in tqdm(self.val)]
+        self.test = [make_full_graph(graph) for graph in tqdm(self.test)]
 
     def _add_edge_laplace_feats(self):
-        self.train = [add_edge_laplace_feats(graph) for graph in self.train]
-        self.val = [add_edge_laplace_feats(graph) for graph in self.val]
-        self.test = [add_edge_laplace_feats(graph) for graph in self.test]
+        self.train = [add_edge_laplace_feats(graph) for graph in tqdm(self.train)]
+        self.val = [add_edge_laplace_feats(graph) for graph in tqdm(self.val)]
+        self.test = [add_edge_laplace_feats(graph) for graph in tqdm(self.test)]

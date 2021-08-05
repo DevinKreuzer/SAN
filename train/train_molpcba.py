@@ -82,6 +82,8 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
 
     targets=torch.tensor([]).to(device)
     scores=torch.tensor([]).to(device)
+    
+    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
 
     with torch.no_grad():
         for iter, (batch_graphs, batch_targets) in enumerate(data_loader):

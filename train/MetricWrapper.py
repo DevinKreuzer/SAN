@@ -38,7 +38,7 @@ class MetricWrapper:
                 Other arguments to call with the metric
         """
 
-        self.metric = METRICS_DICT[metric] if isinstance(metric, str) else metric
+        self.metric = metric
         self.target_nan_mask = target_nan_mask
         self.kwargs = kwargs
 

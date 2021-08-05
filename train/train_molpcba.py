@@ -7,19 +7,22 @@ import torch.nn as nn
 import math
 
 from ogb.graphproppred import Evaluator
+from train.MetricWrapper import MetricWrapper
+
 
 def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
     model.train()
     evaluator = Evaluator(name = "ogbg-molpcba")
 
     epoch_loss = 0
-    epoch_train_auc = 0
 
     targets=torch.tensor([])
     scores=torch.tensor([])
+    
+    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
 
     for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
-        print(iter)
+        
         batch_graphs = batch_graphs.to(device)
         batch_x = batch_graphs.ndata['feat'].to(device)  # num x feat
         batch_e = batch_graphs.edata['feat'].to(device)
@@ -49,11 +52,12 @@ def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
             batch_scores = model.forward(batch_graphs, batch_x, batch_e)
 
 
-        nans = torch.isnan(batch_targets)
-        batch_targets = batch_targets[~nans]
-        batch_scores = batch_scores[~nans]
-
-        loss = model.loss(batch_scores, batch_targets)
+        #nans = torch.isnan(batch_targets)
+        #batch_targets = batch_targets[~nans]
+        #batch_scores = batch_scores[~nans]
+        #loss = model.loss(batch_scores, batch_targets)
+        
+        loss = wrapped_loss_fun(batch_scores, batch_targets)
         loss.backward()
         optimizer.step()
 
@@ -75,7 +79,6 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
     evaluator = Evaluator(name = "ogbg-molpcba")
 
     epoch_test_loss = 0
-    epoch_test_auc = 0
 
     targets=torch.tensor([]).to(device)
     scores=torch.tensor([]).to(device)
@@ -100,13 +103,17 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
 
             else:
                 batch_scores = model.forward(batch_graphs, batch_x, batch_e)
-
-
-            targets = torch.cat((targets, batch_targets), 0)
-            scores = torch.cat((scores, batch_scores), 0)
-
-            loss = model.loss(batch_scores, batch_targets)
+ 
+            #nans = torch.isnan(batch_targets)
+            #batch_targets = batch_targets[~nans]
+            #batch_scores = batch_scores[~nans] 
+            #loss = model.loss(batch_scores, batch_targets)
+            
+            loss = wrapped_loss_fun(batch_scores, batch_targets)
             epoch_test_loss += loss.detach().item()
+            
+            targets = torch.cat((targets, batch_targets.detach().cpu()), 0)
+            scores = torch.cat((scores, batch_scores.detach().cpu()), 0)
 
 
     input_dict = {"y_true": targets, "y_pred": scores}

@@ -23,7 +23,7 @@ def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
     wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
 
     for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
-        print(iter, torch.cuda.memory_allocated(0))
+        # print(iter, torch.cuda.memory_allocated(0))
         batch_graphs = batch_graphs.to(device=device)
         batch_x = batch_graphs.ndata['feat']
         batch_e = batch_graphs.edata['feat']

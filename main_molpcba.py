@@ -192,7 +192,7 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
                     if epoch_nb < epoch-1:
                         os.remove(file)
 
-                scheduler.step(epoch_val_loss)
+                scheduler.step(-epoch_val_ap)
 
                 if optimizer.param_groups[0]['lr'] < params['min_lr']:
                     print("\n!! LR EQUAL TO MIN LR SET.")

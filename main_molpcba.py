@@ -204,18 +204,21 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
                     print("Max_time for training elapsed {:.2f} hours, so stopping".format(params['max_time']))
                     break
 
-    except KeyboardInterrupt:
+    except Exception as e: # Sometimes there's out of memory error after many epochs
         print('-' * 89)
-        print('Exiting from training early because of KeyboardInterrupt')
+        print(f'Exiting from training early Exception: {e}')
 
     #Return test and train metrics at best val metric
     index = epoch_val_APs.index(max(epoch_val_APs))
 
     test_ap = epoch_test_APs[index]
+    val_ap = epoch_val_APs[index]
     train_ap = epoch_train_APs[index]
 
     print("Test AP: {:.4f}".format(test_ap))
+    print("Val AP: {:.4f}".format(val_ap))
     print("Train AP: {:.4f}".format(train_ap))
+    print("Best epoch index: {:.4f}".format(index))
     print("Convergence Time (Epochs): {:.4f}".format(epoch))
     print("TOTAL TIME TAKEN: {:.4f}s".format(time.time()-t0))
     print("AVG TIME PER EPOCH: {:.4f}s".format(np.mean(per_epoch_time)))

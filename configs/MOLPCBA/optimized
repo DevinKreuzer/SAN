@@ -19,7 +19,8 @@
         "min_lr": 1e-5,
         "weight_decay": 0,
         "print_epoch_interval": 5,
-        "max_time": 24
+        "max_time": 24,
+        "batch_accumulation": 2
     },
 
     "net_params": {
@@ -40,7 +41,7 @@
         "residual": true,
         "readout": "sum",
         "in_feat_dropout": 0.0,
-        "dropout": 0.01,
+        "dropout": 0.2,
         "layer_norm": false,
         "batch_norm": true
     }

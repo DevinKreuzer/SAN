@@ -11,7 +11,7 @@ from ogb.graphproppred import Evaluator
 from train.MetricWrapper import MetricWrapper
 
 
-def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
+def train_epoch(model, optimizer, device, data_loader, epoch, LPE, batch_accumulation):
     model.train()
     evaluator = Evaluator(name = "ogbg-molpcba")
 
@@ -20,16 +20,15 @@ def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
     targets=torch.tensor([])
     scores=torch.tensor([])
 
-    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
+    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-flatten")
 
     for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
-        # print(iter, torch.cuda.memory_allocated(0))
+        print(iter, torch.cuda.memory_allocated(0))
         batch_graphs = batch_graphs.to(device=device)
         batch_x = batch_graphs.ndata['feat']
         batch_e = batch_graphs.edata['feat']
 
         batch_targets = batch_targets.to(device)
-        optimizer.zero_grad()
 
         if LPE == 'node':
 
@@ -52,15 +51,14 @@ def train_epoch(model, optimizer, device, data_loader, epoch, LPE):
         else:
             batch_scores = model.forward(batch_graphs, batch_x, batch_e)
 
-
-        #nans = torch.isnan(batch_targets)
-        #batch_targets = batch_targets[~nans]
-        #batch_scores = batch_scores[~nans]
-        #loss = model.loss(batch_scores, batch_targets)
-
         loss = wrapped_loss_fun(batch_scores, batch_targets)
+        loss = loss / batch_accumulation
         loss.backward()
-        optimizer.step()
+
+        # weights update
+        if ((iter + 1) % batch_accumulation == 0) or (iter + 1 == len(data_loader)):
+            optimizer.step()
+            optimizer.zero_grad()
 
         epoch_loss += loss.detach().item()
 
@@ -84,7 +82,7 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
     targets=torch.tensor([])
     scores=torch.tensor([])
 
-    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-mean-label")
+    wrapped_loss_fun = MetricWrapper(metric=model.loss, target_nan_mask="ignore-flatten")
 
     with torch.no_grad():
         for iter, (batch_graphs, batch_targets) in enumerate(data_loader):
@@ -106,11 +104,6 @@ def evaluate_network(model, device, data_loader, epoch, LPE):
 
             else:
                 batch_scores = model.forward(batch_graphs, batch_x, batch_e)
-
-            #nans = torch.isnan(batch_targets)
-            #batch_targets = batch_targets[~nans]
-            #batch_scores = batch_scores[~nans]
-            #loss = model.loss(batch_scores, batch_targets)
 
             loss = wrapped_loss_fun(batch_scores, batch_targets)
             epoch_test_loss += loss.detach().item()

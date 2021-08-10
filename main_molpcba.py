@@ -151,7 +151,7 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
 
                 start = time.time()
 
-                epoch_train_loss, epoch_train_ap, optimizer = train_epoch(model, optimizer, device, train_loader, epoch, net_params['LPE'])
+                epoch_train_loss, epoch_train_ap, optimizer = train_epoch(model, optimizer, device, train_loader, epoch, net_params['LPE'], params["batch_accumulation"])
 
                 epoch_val_loss, epoch_val_ap = evaluate_network(model, device, val_loader, epoch, net_params['LPE'])
                 _, epoch_test_ap = evaluate_network(model, device, test_loader, epoch, net_params['LPE'])

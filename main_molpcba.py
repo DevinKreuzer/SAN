@@ -208,6 +208,11 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
         print('-' * 89)
         print(f'Exiting from training early Exception: {e}')
 
+    except KeyboardInterrupt: # Sometimes there's out of memory error after many epochs
+        print('-' * 89)
+        print(f'Exiting from training keyboard interrupt')
+
+
     #Return test and train metrics at best val metric
     index = epoch_val_APs.index(max(epoch_val_APs))
 

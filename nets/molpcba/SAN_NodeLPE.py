@@ -49,7 +49,8 @@ class SAN_NodeLPE(nn.Module):
         self.extra_mlp = net_params['extra_mlp']
         
         if self.extra_mlp:
-            self.norm = nn.BatchNorm1d(GT_hidden_dim)
+            self.norm_node = nn.BatchNorm1d(GT_hidden_dim-LPE_dim)
+            self.norm_edge = nn.BatchNorm1d(GT_hidden_dim)
             self.relu = nn.ReLU()
             self.linear_init_node = nn.Linear(GT_hidden_dim-LPE_dim, GT_hidden_dim-LPE_dim)
             self.linear_init_edge = nn.Linear(GT_hidden_dim, GT_hidden_dim)
@@ -72,11 +73,11 @@ class SAN_NodeLPE(nn.Module):
         e = self.embedding_e_real(e)
         
         if self.extra_mlp:
-            h = self.norm(h)
+            h = self.norm_node(h)
             h = self.relu(h)
             h = self.linear_init_node(h)
             
-            e = self.norm(e)
+            e = self.norm_edge(e)
             e = self.relu(e)
             e = self.linear_init_edge(e)
 

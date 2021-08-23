@@ -276,6 +276,8 @@ def main():
     parser.add_argument('--LPE_layers', help="Please give a value for LPE_layers")
     parser.add_argument('--LPE_dim', help="Please give a value for LPE_dim")
     parser.add_argument('--LPE_n_heads', help="Please give a value for LPE_n_heads")
+    
+    parser.add_argument('--extra_mlp', help="Please give a value for extra_mlp")
 
     parser.add_argument('--GT_layers', help="Please give a value for GT_layers")
     parser.add_argument('--GT_hidden_dim', help="Please give a value for GT_hidden_dim")
@@ -356,6 +358,9 @@ def main():
 
     if args.LPE is not None:
         net_params['LPE'] = args.LPE
+        
+    if args.extra_mlp is not None:
+        net_params['extra_mlp'] = args.extra_mlp
 
 
     if net_params['LPE'] not in ['node', 'edge', 'none']:

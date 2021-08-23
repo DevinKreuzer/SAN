@@ -27,6 +27,8 @@
         "full_graph": true,
         "gamma": 1e-6,
         "m": 10,
+        
+        "extra_mlp": False,
 
         "LPE": "node",
         "LPE_layers": 3,

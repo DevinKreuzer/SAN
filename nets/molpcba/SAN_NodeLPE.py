@@ -44,7 +44,16 @@ class SAN_NodeLPE(nn.Module):
 
         self.embedding_h = AtomEncoder(emb_dim = GT_hidden_dim-LPE_dim) #Remove some embedding dimensions to make room for concatenating LPE
         self.embedding_e_real = BondEncoder(emb_dim = GT_hidden_dim)
-        self.embedding_e_fake = nn.Embedding(1, GT_hidden_dim)
+        
+        #Optional extra MLP at beginning
+        self.extra_mlp = net_params['extra_mlp']
+        
+        if self.extra_mlp:
+            self.norm = nn.BatchNorm1d(GT_hidden_dim)
+            self.relu = nn.ReLU()
+            self.linear_init_node = nn.Linear(GT_hidden_dim-LPE_dim, GT_hidden_dim-LPE_dim)
+            self.linear_init_edge = nn.Linear(GT_hidden_dim, GT_hidden_dim)
+
         self.linear_A = nn.Linear(2, LPE_dim)
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=LPE_dim, nhead=LPE_n_heads)
@@ -61,6 +70,15 @@ class SAN_NodeLPE(nn.Module):
         # input embedding
         h = self.embedding_h(h)
         e = self.embedding_e_real(e)
+        
+        if self.extra_mlp:
+            h = self.norm(h)
+            h = self.relu(h)
+            h = self.linear_init_node(h)
+            
+            e = self.norm(e)
+            e = self.relu(e)
+            e = self.linear_init_edge(e)
 
         EigVecs = EigVecs.to(dtype=h.dtype)
         EigVals = EigVals.to(dtype=h.dtype)
